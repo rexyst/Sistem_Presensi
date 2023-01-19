@@ -35,6 +35,16 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DBHelper.DB_NAME, n
         db.execSQL(CREATE_TABLE_ROLE)
         db.execSQL(CREATE_TABLE_CLASS)
         db.execSQL(CREATE_TABLE_PRESENSI)
+
+//        add akun admin
+        val values = ContentValues()
+        values.put(ID_USER, 1)
+        values.put(NAMA_USER, "ADMINISTRATOR")
+        values.put(PASSWORD_USER, "Admin")
+        values.put(ROLE_USER, 1)
+        values.put(CLASS_USER, 1)
+        values.put(STATUS_USER, 1)
+        db.insert(TABLE_USER, null, values)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -53,14 +63,39 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DBHelper.DB_NAME, n
         val db = this.writableDatabase
         val values = ContentValues()
         values.put(ID_USER, datas.id)
-        values.put(ID_USER, datas.id)
-        values.put(ID_USER, datas.id)
-        values.put(ID_USER, datas.id)
-        values.put(ID_USER, datas.id)
-        values.put(ID_USER, datas.id)
+        values.put(NAMA_USER, datas.nama)
+        values.put(PASSWORD_USER, datas.password)
+        values.put(ROLE_USER, datas.role)
+        values.put(CLASS_USER, datas.kelas)
+        values.put(STATUS_USER, datas.status)
         val _success = db.insert(TABLE_USER, null, values)
         db.close()
         return (Integer.parseInt("$_success") != -1)
+    }
+
+    fun getLogin(_id: Int): User {
+        val datas = User()
+        val db = writableDatabase
+        val selectQuery = "SELECT * FROM $TABLE_USER WHERE $ID_USER = $_id"
+        val cursor = db.rawQuery(selectQuery, null)
+            if (cursor != null) {
+                cursor.moveToFirst()
+                try {
+                    datas.id = Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow(ID_USER)))
+                    datas.password = cursor.getString(
+                        cursor.getColumnIndexOrThrow(
+                            PASSWORD_USER
+                        )
+                    )
+                    datas.login = 1  // data ada di database
+                } catch (e: Exception){
+                    datas.login = 0  // data tidak ada di database
+                }
+            } else {
+                datas.login = 0
+            }
+        cursor.close()
+        return datas
     }
 
     companion object {
